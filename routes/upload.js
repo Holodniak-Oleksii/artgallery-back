@@ -17,8 +17,6 @@ const s3Upload = async (file) => {
 
 const upload = multer({ storage: multerConfig });
 
-// const upload = multer({dest: "uploads/" });
-
 const multiUpload = upload.fields([
   { name: "image", maxCount: 1 },
   { name: "file3D", maxCount: 1 },
@@ -26,8 +24,8 @@ const multiUpload = upload.fields([
 
 router.post("/add", multiUpload, async (req, res) => {
   try {
-    // const result = await s3Upload(req.file);
     const filesData = req.files;
+    
     const resultImg = await s3Upload(filesData.image[0]);
     const result3D = await s3Upload(filesData.file3D[0]);
 
@@ -41,10 +39,27 @@ router.post("/add", multiUpload, async (req, res) => {
       if (err) {
         res.status(500).json({ message: err });
       } else {
-    res.status(201).json({ result });
+        res.status(201).json({ result });
       }
     });
-    res.json({ message: "Successfully uploaded files" });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+router.get("/all", async (req, res) => {
+  try {
+    const arts = await Art.find({});
+    res.json(arts);
+  } catch (e) {
+    res.status(500).json({ message: "Невдалося дістати дані" });
+  }
+});
+
+router.post("/detail", async (req, res) => {
+  try {
+    let art = await Art.find({ _id: req.body.id });
+    res.json(art);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
