@@ -2,8 +2,9 @@ const { Router } = require("express");
 const router = Router();
 const { S3 } = require("aws-sdk");
 const multer = require("multer");
-const Art = require("../models/art");
+const Art = require("../models/art.model");
 const multerConfig = multer.memoryStorage();
+const isAuth = require("../middleware/auth.middleware");
 
 const s3Upload = async (file) => {
   const s3 = new S3();
@@ -22,17 +23,20 @@ const multiUpload = upload.fields([
   { name: "file3D", maxCount: 1 },
 ]);
 
-router.post("/add", multiUpload, async (req, res) => {
+router.post("/add", [isAuth, multiUpload], async (req, res) => {
   try {
+    console.log("🚀 ~ file: upload.js:26 ~ router.post ~ req:", req);
     const filesData = req.files;
-    
+
     const resultImg = await s3Upload(filesData.image[0]);
     const result3D = await s3Upload(filesData.file3D[0]);
 
     const art = new Art({
       name: req.body.name,
+      description: req.body.description,
       pathImage: resultImg.Location,
       path3D: result3D.Location,
+      categories: JSON.parse(req.body.categories),
     });
 
     await art.save(function (err, result) {
@@ -42,24 +46,6 @@ router.post("/add", multiUpload, async (req, res) => {
         res.status(201).json({ result });
       }
     });
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-});
-
-router.get("/all", async (req, res) => {
-  try {
-    const arts = await Art.find({});
-    res.json(arts);
-  } catch (e) {
-    res.status(500).json({ message: "Невдалося дістати дані" });
-  }
-});
-
-router.post("/detail", async (req, res) => {
-  try {
-    let art = await Art.find({ _id: req.body.id });
-    res.json(art);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
