@@ -4,7 +4,6 @@ const { S3 } = require("aws-sdk");
 const multer = require("multer");
 const Art = require("../models/art.model");
 const multerConfig = multer.memoryStorage();
-const isAuth = require("../middleware/auth.middleware");
 
 const s3Upload = async (file) => {
   const s3 = new S3();
@@ -23,9 +22,8 @@ const multiUpload = upload.fields([
   { name: "file3D", maxCount: 1 },
 ]);
 
-router.post("/add", [isAuth, multiUpload], async (req, res) => {
+router.post("/add", multiUpload, async (req, res) => {
   try {
-    console.log("🚀 ~ file: upload.js:26 ~ router.post ~ req:", req);
     const filesData = req.files;
 
     const resultImg = await s3Upload(filesData.image[0]);
@@ -37,13 +35,14 @@ router.post("/add", [isAuth, multiUpload], async (req, res) => {
       pathImage: resultImg.Location,
       path3D: result3D.Location,
       categories: JSON.parse(req.body.categories),
+      owner: req.body.owner,
     });
 
     await art.save(function (err, result) {
       if (err) {
         res.status(500).json({ message: err });
       } else {
-        res.status(201).json({ result });
+        res.status(201).json({ completed: true, ...result });
       }
     });
   } catch (e) {

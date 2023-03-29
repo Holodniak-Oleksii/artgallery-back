@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { check, validationResult } = require("express-validator");
 const User = require("../models/user.model");
+const Art = require("../models/art.model");
 
 // /api/auth/register
 router.post(
@@ -33,13 +34,17 @@ router.post(
       const candidateEmail = await User.findOne({ email });
 
       if (candidateEmail) {
-        return res.status(400).json({ message: "This user already exists" });
+        return res
+          .status(400)
+          .json({ filed: "email", message: "This user already exists" });
       }
 
       const candidateName = await User.findOne({ username });
 
       if (candidateName) {
-        return res.status(400).json({ message: "This user already exists" });
+        return res
+          .status(400)
+          .json({ filed: "username", message: "This user already exists" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -51,7 +56,7 @@ router.post(
         expiresIn: "7h",
       });
 
-      res.json({ token, userId: user.id });
+      res.json({ token, userId: user.id, isAuth: true });
     } catch (e) {
       res
         .status(500)
@@ -79,22 +84,25 @@ router.post(
       const user = await User.findOne({ username });
 
       if (!user) {
-        return res.status(400).json({ message: "No user found" });
+        return res
+          .status(400)
+          .json({ filed: "username", message: "No user found" });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: "Incorrect password, please try again" });
+        return res.status(400).json({
+          filed: "password",
+          message: "Incorrect password, please try again",
+        });
       }
 
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
         expiresIn: "7h",
       });
 
-      res.json({ token, userId: user.id });
+      res.json({ token, userId: user.id, isAuth: true });
     } catch (e) {
       res.status(500).json({ message: "An error occurred, please try again" });
     }
@@ -118,7 +126,8 @@ router.post("/check", async (req, res) => {
 router.post("/get-user", async (req, res) => {
   try {
     let user = await User.find({ _id: req.body.id });
-    res.json(user[0]);
+    let arts = await Art.find({ owner: req.body.id });
+    res.json({ ...user[0]._doc, arts: arts });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
