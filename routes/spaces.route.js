@@ -13,6 +13,41 @@ router.get("/all", async (req, res) => {
   }
 });
 
+router.post("/filter", async (req, res) => {
+  try {
+    if (
+      !req.body.query &&
+      (!req.body.category || req.body.category === "All")
+    ) {
+      const result = await Art.find({});
+      res.json(result);
+    } else {
+      if (req.body.category === "All") {
+        const result = await Art.find({
+          name: {
+            $regex: req.body.query,
+            $options: "i",
+          },
+        });
+        res.json(result);
+      } else {
+        const result = await Art.find({
+          categories: {
+            $in: [req.body.category],
+          },
+          name: {
+            $regex: req.body.query,
+            $options: "i",
+          },
+        });
+        res.json(result);
+      }
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 router.post("/detail", async (req, res) => {
   try {
     let art = await Art.find({ _id: mongoose.Types.ObjectId(req.body.id) });

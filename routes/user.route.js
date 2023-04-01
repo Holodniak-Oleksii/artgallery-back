@@ -52,11 +52,20 @@ router.post(
 
       await user.save();
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "7h",
-      });
+      const token = jwt.sign(
+        { userId: user.id, userName: user.username },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7h",
+        }
+      );
 
-      res.json({ token, userId: user.id, isAuth: true });
+      res.json({
+        token,
+        userId: user.id,
+        isAuth: true,
+        userName: user.username,
+      });
     } catch (e) {
       res
         .status(500)
@@ -98,11 +107,20 @@ router.post(
         });
       }
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "7h",
-      });
+      const token = jwt.sign(
+        { userId: user.id, userName: user.username },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7h",
+        }
+      );
 
-      res.json({ token, userId: user.id, isAuth: true });
+      res.json({
+        token,
+        userId: user.id,
+        isAuth: true,
+        userName: user.username,
+      });
     } catch (e) {
       res.status(500).json({ message: "An error occurred, please try again" });
     }
@@ -117,7 +135,17 @@ router.post("/check", async (req, res) => {
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    res.json({ token, userID: decoded.userId, isAuth: true });
+    console.log(
+      "🚀 ~ file: user.route.js:128 ~ router.post ~ req.user:",
+      req.user
+    );
+    // let art = await Art.find({ _id: mongoose.Types.ObjectId(req.body.id) });
+    res.json({
+      token,
+      userID: decoded.userId,
+      isAuth: true,
+      userName: decoded.userName,
+    });
   } catch (e) {
     res.status(401).json({ token: null, userID: null, isAuth: false });
   }

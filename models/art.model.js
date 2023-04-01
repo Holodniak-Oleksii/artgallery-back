@@ -7,5 +7,7 @@ const schema = new Schema({
   path3D: { type: String, required: true },
   categories: { type: Array, required: true, default: [] },
   owner: { type: Types.ObjectId, ref: "User" },
+  ownerName: { type: String },
 });
+schema.index({ name: "text" });
 module.exports = model("Art", schema);

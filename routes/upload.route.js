@@ -36,6 +36,7 @@ router.post("/add", multiUpload, async (req, res) => {
       path3D: result3D.Location,
       categories: JSON.parse(req.body.categories),
       owner: req.body.owner,
+      ownerName: req.body.ownerName,
     });
 
     await art.save(function (err, result) {
