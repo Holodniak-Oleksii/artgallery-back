@@ -63,7 +63,6 @@ router.post(
       res.json({
         token,
         userId: user.id,
-        isAuth: true,
         userName: user.username,
       });
     } catch (e) {
@@ -118,7 +117,6 @@ router.post(
       res.json({
         token,
         userId: user.id,
-        isAuth: true,
         userName: user.username,
       });
     } catch (e) {
@@ -135,15 +133,9 @@ router.post("/check", async (req, res) => {
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    console.log(
-      "🚀 ~ file: user.route.js:128 ~ router.post ~ req.user:",
-      req.user
-    );
-    // let art = await Art.find({ _id: mongoose.Types.ObjectId(req.body.id) });
     res.json({
       token,
       userID: decoded.userId,
-      isAuth: true,
       userName: decoded.userName,
     });
   } catch (e) {

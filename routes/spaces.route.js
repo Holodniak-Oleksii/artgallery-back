@@ -16,16 +16,16 @@ router.get("/all", async (req, res) => {
 router.post("/filter", async (req, res) => {
   try {
     if (
-      !req.body.query &&
-      (!req.body.category || req.body.category === "All")
+      !req.body.search &&
+      (!req.body.category || req.body.category === "all")
     ) {
       const result = await Art.find({});
       res.json(result);
     } else {
-      if (req.body.category === "All") {
+      if (req.body.category === "all") {
         const result = await Art.find({
           name: {
-            $regex: req.body.query,
+            $regex: req.body.search,
             $options: "i",
           },
         });
@@ -36,7 +36,7 @@ router.post("/filter", async (req, res) => {
             $in: [req.body.category],
           },
           name: {
-            $regex: req.body.query,
+            $regex: req.body.search,
             $options: "i",
           },
         });
@@ -60,8 +60,6 @@ router.post("/detail", async (req, res) => {
       owner: owner[0].username,
       ownerId: owner[0]._id,
     };
-
-    console.log("🚀 ~ file: spaces.route.js:24 ~ router.post ~ data:", data);
 
     res.json(data);
   } catch (e) {
