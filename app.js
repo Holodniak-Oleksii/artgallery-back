@@ -13,9 +13,8 @@ const cors = require("cors");
 const path = require("path");
 
 app.use(cors());
-app.use(express.json({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
-
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use("/api", upload);
 app.use("/api/space", spaces);
 app.use("/api/auth", user);
